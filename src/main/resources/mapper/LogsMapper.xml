@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytedance.fast_tickets.dao.LogsDao">
+    <resultMap id="count" type="java.util.Map">
+        <result column="name" property="name"/>
+        <result column="stock" property="stock"/>
+        <result column="sale" property="sale"/>
+    </resultMap>
+
+    <select id="count" resultMap="count">
+        SELECT i.name, i.stock, COUNT(l.id) sale
+        FROM logs l,
+             inventory i
+        WHERE l.goods_id = i.id
+        GROUP BY l.goods_id
+    </select>
+
+    <select id="findById" resultType="com.bytedance.fast_tickets.entity.Logs">
+        SELECT *
+        FROM logs l
+        WHERE l.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.bytedance.fast_tickets.entity.Logs">
+        INSERT INTO logs(id, user_id, goods_id, status, create_time, update_time)
+        VALUES (#{id}, #{userId}, #{goodsId}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update" parameterType="com.bytedance.fast_tickets.entity.Logs">
+        UPDATE logs l
+        SET l.status      = #{status},
+            l.update_time = #{updateTime}
+    </update>
+
+    <update id="updateList" parameterType="com.bytedance.fast_tickets.entity.LogsUpdateList">
+        UPDATE logs l
+        SET l.status = #{status}, l.update_time = #{updateTime}
+        WHERE l.id in
+        <foreach collection="idList" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>
